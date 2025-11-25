@@ -4,6 +4,7 @@ import { X, Heart, Star, MapPin, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { BottomNav } from '@/components/BottomNav';
+import { MatchModal } from '@/components/MatchModal';
 import { mockPets } from '@/data/mockData';
 import { Pet, SwipeAction } from '@/types/pet';
 import { toast } from 'sonner';
@@ -12,6 +13,8 @@ export default function Swipe() {
   const [pets, setPets] = useState<Pet[]>(mockPets);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showInfo, setShowInfo] = useState(false);
+  const [matchedPet, setMatchedPet] = useState<Pet | null>(null);
+  const [showMatchModal, setShowMatchModal] = useState(false);
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-30, 30]);
@@ -23,9 +26,8 @@ export default function Swipe() {
     if (action === 'like' || action === 'superlike') {
       // Simula 30% de chance de match
       if (Math.random() > 0.7) {
-        toast.success(`É um Match com ${currentPet.name}! 💕`, {
-          description: 'Vocês podem começar a conversar agora!'
-        });
+        setMatchedPet(currentPet);
+        setShowMatchModal(true);
       }
     }
 
@@ -178,6 +180,14 @@ export default function Swipe() {
           </Button>
         </div>
       </div>
+
+      {matchedPet && (
+        <MatchModal
+          isOpen={showMatchModal}
+          onClose={() => setShowMatchModal(false)}
+          pet={matchedPet}
+        />
+      )}
 
       <BottomNav />
     </div>
