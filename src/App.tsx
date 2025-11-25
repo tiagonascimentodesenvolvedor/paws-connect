@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Auth from "./pages/Auth";
+import Onboarding from "./pages/Onboarding";
 import Swipe from "./pages/Swipe";
 import Matches from "./pages/Matches";
 import Messages from "./pages/Messages";
@@ -24,6 +25,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={isAuthenticated ? <Navigate to="/swipe" /> : <Auth />} />
+            <Route path="/onboarding" element={isAuthenticated ? <Onboarding /> : <Navigate to="/" />} />
             <Route path="/swipe" element={isAuthenticated ? <Swipe /> : <Navigate to="/" />} />
             <Route path="/matches" element={isAuthenticated ? <Matches /> : <Navigate to="/" />} />
             <Route path="/messages" element={isAuthenticated ? <Messages /> : <Navigate to="/" />} />
