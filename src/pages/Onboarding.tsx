@@ -13,6 +13,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, ArrowRight, Upload, X } from 'lucide-react';
 import { Species, Gender, Size, Interest } from '@/types/pet';
+import { useCreatePet } from '@/hooks/usePets';
+import { toast } from 'sonner';
 
 const countries = [
   { code: 'BR', name: 'Brasil' },
@@ -91,26 +93,37 @@ interface OnboardingData {
 
 export default function Onboarding() {
   const navigate = useNavigate();
+  const createPet = useCreatePet();
   const [currentStep, setCurrentStep] = useState(1);
   const [onboardingData, setOnboardingData] = useState<Partial<OnboardingData>>({
     photos: [],
     interests: [],
   });
 
-  const handleComplete = () => {
-    // Salvar pet no localStorage
-    const newPet = {
-      id: 'current-user-pet',
-      ownerId: 'current-user',
-      ...onboardingData,
-      profilePhotoUrl: onboardingData.profilePhoto || '',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem('currentUserPet', JSON.stringify(newPet));
-    localStorage.setItem('hasCompletedOnboarding', 'true');
-    navigate('/');
+  const handleComplete = async () => {
+    try {
+      await createPet.mutateAsync({
+        name: onboardingData.name!,
+        species: onboardingData.species!,
+        breed: onboardingData.breed,
+        age: onboardingData.age!,
+        gender: onboardingData.gender!,
+        size: onboardingData.size,
+        weightKg: onboardingData.weightKg,
+        bio: onboardingData.bio!,
+        country: onboardingData.country!,
+        city: onboardingData.city!,
+        profilePhotoUrl: onboardingData.profilePhoto!,
+        photos: onboardingData.photos || [],
+        interests: onboardingData.interests || [],
+      });
+      
+      toast.success('Perfil criado com sucesso!');
+      navigate('/swipe');
+    } catch (error) {
+      toast.error('Erro ao criar perfil');
+      console.error(error);
+    }
   };
 
   return (

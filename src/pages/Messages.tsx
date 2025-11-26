@@ -3,15 +3,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { mockMatches, mockMessages, currentUserPet } from '@/data/mockData';
 import { ArrowLeft, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Message } from '@/types/pet';
+import { useMatches } from '@/hooks/useMatches';
+import { useMessages, useSendMessage } from '@/hooks/useMessages';
+import { useCurrentPet } from '@/hooks/usePets';
 
 export default function Messages() {
   const { matchId } = useParams();
   const navigate = useNavigate();
-  const [messages, setMessages] = useState(mockMessages);
+  const currentPet = useCurrentPet();
+  const { data: matches } = useMatches();
+  const { data: messages } = useMessages(matchId);
+  const sendMessage = useSendMessage();
   const [newMessage, setNewMessage] = useState('');
 
   if (!matchId) {
@@ -24,7 +28,7 @@ export default function Messages() {
           </header>
 
           <div className="space-y-4">
-            {mockMatches.map((match) => (
+            {matches?.map((match) => (
               <div
                 key={match.id}
                 className="glass-card rounded-2xl p-4 cursor-pointer hover:border-primary transition-smooth"
@@ -52,25 +56,25 @@ export default function Messages() {
     );
   }
 
-  const match = mockMatches.find((m) => m.id === matchId);
+  const match = matches?.find((m) => m.id === matchId);
   if (!match) {
     navigate('/messages');
     return null;
   }
 
-  const handleSend = () => {
-    if (!newMessage.trim()) return;
+  const handleSend = async () => {
+    if (!newMessage.trim() || !currentPet) return;
 
-    const newMsg: Message = {
-      id: `msg-${Date.now()}`,
-      matchId,
-      senderPetId: currentUserPet.id,
-      content: newMessage,
-      sentAt: new Date().toISOString()
-    };
-
-    setMessages([...messages, newMsg]);
-    setNewMessage('');
+    try {
+      await sendMessage.mutateAsync({
+        matchId,
+        senderPetId: currentPet.id,
+        content: newMessage,
+      });
+      setNewMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   return (
@@ -102,10 +106,8 @@ export default function Messages() {
 
       <div className="flex-1 overflow-y-auto px-4 py-6 pb-32">
         <div className="max-w-lg mx-auto space-y-4">
-          {messages
-            .filter((msg) => msg.matchId === matchId)
-            .map((msg, index) => {
-              const isOwn = msg.senderPetId === currentUserPet.id;
+          {messages?.map((msg, index) => {
+              const isOwn = currentPet && msg.senderPetId === currentPet.id;
               return (
                 <motion.div
                   key={msg.id}

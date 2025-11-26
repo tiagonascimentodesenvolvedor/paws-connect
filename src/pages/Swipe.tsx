@@ -5,12 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { BottomNav } from '@/components/BottomNav';
 import { MatchModal } from '@/components/MatchModal';
-import { mockPets } from '@/data/mockData';
 import { Pet, SwipeAction } from '@/types/pet';
 import { toast } from 'sonner';
+import { useAvailablePets, useCurrentPet } from '@/hooks/usePets';
+import { useSwipe } from '@/hooks/useSwipes';
 
 export default function Swipe() {
-  const [pets, setPets] = useState<Pet[]>(mockPets);
+  const { data: availablePets, isLoading } = useAvailablePets();
+  const currentPet = useCurrentPet();
+  const swipeMutation = useSwipe();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showInfo, setShowInfo] = useState(false);
   const [matchedPet, setMatchedPet] = useState<Pet | null>(null);
@@ -20,19 +23,30 @@ export default function Swipe() {
   const rotate = useTransform(x, [-200, 200], [-30, 30]);
   const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
 
-  const currentPet = pets[currentIndex];
+  const pets = availablePets || [];
+  const currentCard = pets[currentIndex];
 
-  const handleSwipe = (action: SwipeAction) => {
-    if (action === 'like' || action === 'superlike') {
-      // Simula 30% de chance de match
-      if (Math.random() > 0.7) {
-        setMatchedPet(currentPet);
+  const handleSwipe = async (action: SwipeAction) => {
+    if (!currentPet || !currentCard) return;
+
+    try {
+      const result = await swipeMutation.mutateAsync({
+        swiperPetId: currentPet.id,
+        swipedPetId: currentCard.id,
+        action,
+      });
+
+      if (result.isMatch) {
+        setMatchedPet(currentCard);
         setShowMatchModal(true);
       }
-    }
 
-    setCurrentIndex((prev) => prev + 1);
-    x.set(0);
+      setCurrentIndex((prev) => prev + 1);
+      x.set(0);
+    } catch (error) {
+      toast.error('Erro ao processar swipe');
+      console.error(error);
+    }
   };
 
   const handleDragEnd = (event: any, info: PanInfo) => {
@@ -47,6 +61,17 @@ export default function Swipe() {
     }
   };
 
+  if (isLoading || !currentCard) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 pb-24">
+        <div className="text-center">
+          <div className="animate-pulse text-lg">Carregando...</div>
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
   if (currentIndex >= pets.length) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 pb-24">
@@ -58,7 +83,7 @@ export default function Swipe() {
           <p className="text-muted-foreground mb-6">
             Volte mais tarde para conhecer novos amigos!
           </p>
-          <Button onClick={() => { setPets(mockPets); setCurrentIndex(0); }}>
+          <Button onClick={() => setCurrentIndex(0)}>
             Reiniciar
           </Button>
         </div>
@@ -80,8 +105,8 @@ export default function Swipe() {
             whileTap={{ cursor: 'grabbing' }}
           >
             <img
-              src={currentPet.profilePhotoUrl}
-              alt={currentPet.name}
+              src={currentCard.profilePhotoUrl}
+              alt={currentCard.name}
               className="w-full h-full object-cover"
             />
             
@@ -91,11 +116,11 @@ export default function Swipe() {
               <div className="flex items-end justify-between mb-3">
                 <div>
                   <h2 className="text-3xl font-bold mb-1">
-                    {currentPet.name}, {currentPet.age}
+                    {currentCard.name}, {currentCard.age}
                   </h2>
                   <p className="text-white/80 flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
-                    {currentPet.city} • {currentPet.distanceKm}km
+                    {currentCard.city} {currentCard.distanceKm && `• ${currentCard.distanceKm}km`}
                   </p>
                 </div>
                 <Button
@@ -114,17 +139,17 @@ export default function Swipe() {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-3"
                 >
-                  <p className="text-white/90">{currentPet.bio}</p>
+                  <p className="text-white/90">{currentCard.bio}</p>
                   <div className="flex flex-wrap gap-2">
-                    {currentPet.interests.map((interest) => (
+                    {currentCard.interests.map((interest) => (
                       <Badge key={interest} variant="secondary" className="bg-white/20 backdrop-blur-sm border-0">
                         {interest}
                       </Badge>
                     ))}
                   </div>
                   <div className="text-sm text-white/70">
-                    {currentPet.breed} • {currentPet.gender === 'male' ? 'Macho' : 'Fêmea'}
-                    {currentPet.weightKg && ` • ${currentPet.weightKg}kg`}
+                    {currentCard.breed} • {currentCard.gender === 'male' ? 'Macho' : 'Fêmea'}
+                    {currentCard.weightKg && ` • ${currentCard.weightKg}kg`}
                   </div>
                 </motion.div>
               )}
