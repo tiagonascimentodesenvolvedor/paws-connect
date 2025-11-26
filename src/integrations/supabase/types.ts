@@ -14,7 +14,218 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      matches: {
+        Row: {
+          id: string
+          is_active: boolean
+          matched_at: string
+          pet1_id: string
+          pet2_id: string
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean
+          matched_at?: string
+          pet1_id: string
+          pet2_id: string
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          matched_at?: string
+          pet1_id?: string
+          pet2_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_pet1_id_fkey"
+            columns: ["pet1_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_pet2_id_fkey"
+            columns: ["pet2_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          id: string
+          match_id: string
+          read_at: string | null
+          sender_pet_id: string
+          sent_at: string
+        }
+        Insert: {
+          content: string
+          id?: string
+          match_id: string
+          read_at?: string | null
+          sender_pet_id: string
+          sent_at?: string
+        }
+        Update: {
+          content?: string
+          id?: string
+          match_id?: string
+          read_at?: string | null
+          sender_pet_id?: string
+          sent_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_pet_id_fkey"
+            columns: ["sender_pet_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pets: {
+        Row: {
+          age: number
+          bio: string
+          breed: string | null
+          city: string
+          country: string
+          created_at: string
+          gender: string
+          id: string
+          interests: string[]
+          is_active: boolean
+          name: string
+          owner_id: string
+          photos: string[]
+          profile_photo_url: string
+          size: string | null
+          species: string
+          updated_at: string
+          weight_kg: number | null
+        }
+        Insert: {
+          age: number
+          bio: string
+          breed?: string | null
+          city: string
+          country: string
+          created_at?: string
+          gender: string
+          id?: string
+          interests?: string[]
+          is_active?: boolean
+          name: string
+          owner_id: string
+          photos?: string[]
+          profile_photo_url: string
+          size?: string | null
+          species: string
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Update: {
+          age?: number
+          bio?: string
+          breed?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          gender?: string
+          id?: string
+          interests?: string[]
+          is_active?: boolean
+          name?: string
+          owner_id?: string
+          photos?: string[]
+          profile_photo_url?: string
+          size?: string | null
+          species?: string
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pets_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      swipes: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          swiped_pet_id: string
+          swiper_pet_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          swiped_pet_id: string
+          swiper_pet_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          swiped_pet_id?: string
+          swiper_pet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swipes_swiped_pet_id_fkey"
+            columns: ["swiped_pet_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swipes_swiper_pet_id_fkey"
+            columns: ["swiper_pet_id"]
+            isOneToOne: false
+            referencedRelation: "pets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
