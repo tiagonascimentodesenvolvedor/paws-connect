@@ -5,11 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { currentUserPet } from '@/data/mockData';
 import { MapPin, Edit, Heart, Users, X, Check, Camera, Plus, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import type { Pet, Interest } from '@/types/pet';
+import { useCurrentPet, useUpdatePet } from '@/hooks/usePets';
 
 const availableInterests: { value: Interest; label: string }[] = [
   { value: 'playdate', label: 'Playdate' },
@@ -22,10 +22,25 @@ const availableInterests: { value: Interest; label: string }[] = [
 ];
 
 export default function Profile() {
+  const currentPet = useCurrentPet();
+  const updatePet = useUpdatePet();
   const [isEditing, setIsEditing] = useState(false);
-  const [editedPet, setEditedPet] = useState<Pet>(currentUserPet);
+  const [editedPet, setEditedPet] = useState<Pet | null>(null);
   const profilePhotoInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  // Initialize editedPet when currentPet loads
+  if (currentPet && !editedPet && !isEditing) {
+    setEditedPet(currentPet);
+  }
+
+  if (!currentPet || !editedPet) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse">Carregando perfil...</div>
+      </div>
+    );
+  }
 
   const handleFileRead = (file: File): Promise<string> => {
     return new Promise((resolve) => {
@@ -63,15 +78,22 @@ export default function Profile() {
     setEditedPet({ ...editedPet, interests });
   };
 
-  const handleSave = () => {
-    localStorage.setItem('userPet', JSON.stringify(editedPet));
-    Object.assign(currentUserPet, editedPet);
-    setIsEditing(false);
-    toast.success('Perfil atualizado com sucesso!');
+  const handleSave = async () => {
+    try {
+      await updatePet.mutateAsync({
+        id: editedPet.id,
+        ...editedPet,
+      });
+      setIsEditing(false);
+      toast.success('Perfil atualizado com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao atualizar perfil');
+      console.error(error);
+    }
   };
 
   const handleCancel = () => {
-    setEditedPet(currentUserPet);
+    setEditedPet(currentPet);
     setIsEditing(false);
   };
 
