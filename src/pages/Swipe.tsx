@@ -70,12 +70,6 @@ export default function Swipe() {
   return (
     <div className="min-h-screen px-4 pt-6 pb-24">
       <div className="max-w-lg mx-auto">
-        <header className="mb-6">
-          <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
-            PetMatch
-          </h1>
-        </header>
-
         <div className="relative h-[600px] mb-6">
           <motion.div
             className="absolute inset-0 glass-card rounded-3xl overflow-hidden shadow-card"
