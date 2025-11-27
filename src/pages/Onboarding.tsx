@@ -119,7 +119,7 @@ export default function Onboarding() {
       });
       
       toast.success('Perfil criado com sucesso!');
-      navigate('/swipe');
+      navigate('/profile');
     } catch (error) {
       toast.error('Erro ao criar perfil');
       console.error(error);
