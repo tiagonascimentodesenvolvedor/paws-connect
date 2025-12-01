@@ -6,55 +6,26 @@ import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
 import { Heart, Mail, Lock } from 'lucide-react';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
-import { usePets } from '@/hooks/usePets';
-import { useEffect } from 'react';
 
 export default function Auth() {
   const navigate = useNavigate();
-  const { signIn, signUp, user } = useAuth();
-  const { data: pets } = usePets();
   const [isLogin, setIsLogin] = useState(true);
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      // Check if user has a pet
-      if (pets && pets.length > 0) {
-        navigate('/swipe');
-      } else {
-        navigate('/onboarding');
-      }
-    }
-  }, [user, pets, navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      const { error } = isLogin 
-        ? await signIn(email, password)
-        : await signUp(email, password, name);
-
-      if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          toast.error('Email ou senha incorretos');
-        } else if (error.message.includes('User already registered')) {
-          toast.error('Este email já está cadastrado');
-        } else {
-          toast.error(error.message);
-        }
-      } else {
-        toast.success(isLogin ? 'Login realizado!' : 'Conta criada com sucesso!');
-      }
-    } catch (error) {
-      toast.error('Erro ao processar sua solicitação');
-    } finally {
-      setLoading(false);
+    
+    // Mock auth - salva no localStorage
+    localStorage.setItem('isAuthenticated', 'true');
+    toast.success(isLogin ? 'Login realizado!' : 'Conta criada!');
+    
+    // Verifica se tem pet cadastrado
+    const hasPet = localStorage.getItem('currentUserPet');
+    if (hasPet) {
+      navigate('/swipe');
+    } else {
+      navigate('/onboarding');
     }
   };
 
@@ -101,20 +72,6 @@ export default function Auth() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Seu nome"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-            )}
-            
             <div className="space-y-2">
               <Label htmlFor="email">
                 <Mail className="w-4 h-4 inline mr-2" />
@@ -146,8 +103,8 @@ export default function Auth() {
               />
             </div>
 
-            <Button type="submit" className="w-full gradient-primary shadow-glow" disabled={loading}>
-              {loading ? 'Processando...' : (isLogin ? 'Entrar' : 'Criar Conta')}
+            <Button type="submit" className="w-full gradient-primary shadow-glow">
+              {isLogin ? 'Entrar' : 'Criar Conta'}
             </Button>
           </form>
 

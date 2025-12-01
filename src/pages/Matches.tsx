@@ -1,20 +1,11 @@
 import { BottomNav } from '@/components/BottomNav';
+import { mockMatches } from '@/data/mockData';
 import { Heart, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useMatches } from '@/hooks/useMatches';
 
 export default function Matches() {
   const navigate = useNavigate();
-  const { data: matches, isLoading } = useMatches();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse">Carregando...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen px-4 pt-6 pb-24">
@@ -25,11 +16,11 @@ export default function Matches() {
             Seus Matches
           </h1>
           <p className="text-muted-foreground mt-1">
-            {matches?.length || 0} {matches?.length === 1 ? 'match' : 'matches'}
+            {mockMatches.length} {mockMatches.length === 1 ? 'match' : 'matches'}
           </p>
         </header>
 
-        {!matches || matches.length === 0 ? (
+        {mockMatches.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-20 h-20 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
               <Heart className="w-10 h-10 text-muted-foreground" />
@@ -41,7 +32,7 @@ export default function Matches() {
           </div>
         ) : (
           <div className="space-y-4">
-            {matches.map((match, index) => (
+            {mockMatches.map((match, index) => (
               <motion.div
                 key={match.id}
                 initial={{ opacity: 0, y: 20 }}

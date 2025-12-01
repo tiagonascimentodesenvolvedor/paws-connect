@@ -3,23 +3,20 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { MapPin, Bell, Shield, LogOut, Info } from 'lucide-react';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
 
 export default function Settings() {
-  const { signOut } = useAuth();
+  const navigate = useNavigate();
   const [searchRadius, setSearchRadius] = useState([10]);
   const [notifications, setNotifications] = useState(true);
 
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      toast.success('Logout realizado');
-    } catch (error) {
-      toast.error('Erro ao fazer logout');
-    }
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    toast.success('Logout realizado');
+    navigate('/');
   };
 
   return (
